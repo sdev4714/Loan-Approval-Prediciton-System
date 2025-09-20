@@ -23,7 +23,7 @@ conn = mysql.connector.connect(
 cursor = conn.cursor(dictionary=True)
 
 # -------------------- OPENAI CONFIG --------------------
-openai.api_key = os.getenv("AIzaSyDyQNxedi1JpPkRyC85-zwxd4mJqTWvZh0")
+openai.api_key = os.getenv("**************")
 # -------------------- MODEL PATHS --------------------
 MODEL_PATH = 'models/loan_pipeline.pkl'
 
