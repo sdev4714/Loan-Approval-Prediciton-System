@@ -1,42 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personal AI | LoanPredict</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal AI Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='personal_ai.css') }}">
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="logo">LoanPredict</div>
-    <ul class="nav-links">
-      <li><span class="welcome">Hi, {{ name }}!</span></li>
-      <li><a href="{{ url_for('home') }}">Dashboard</a></li>
-      <li><a href="{{ url_for('logout') }}">Logout</a></li>
-    </ul>
-  </nav>
+<div class="container">
+    <h2>Personal AI Chat</h2>
 
-  <!-- Hero -->
-  <section class="hero" style="padding:60px 20px; text-align:center;">
-    <div class="hero-content">
-      <h1>🤖 Personal AI Recommendations</h1>
-      <p>Get personalized loan recommendations based on your profile and previous activity.</p>
+    <!-- Details Form -->
+    <div id="details-form-container" {% if recommendation %}style="display:none"{% endif %}>
+        <form method="POST" id="details-form">
+            <div class="form-group">
+                <input type="text" name="person_age" placeholder="Age" required>
+                <input type="text" name="person_gender" placeholder="Gender" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="person_education" placeholder="Education" required>
+                <input type="text" name="person_home_ownership" placeholder="Home Ownership" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="person_income" placeholder="Income (annual)" required>
+                <input type="text" name="person_emp_exp" placeholder="Years of Experience" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="credit_score" placeholder="Credit Score" required>
+                <input type="text" name="loan_amnt" placeholder="Loan Amount" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="loan_intent" placeholder="Loan Purpose" required>
+            </div>
+            <button type="submit">Submit Details</button>
+        </form>
     </div>
-  </section>
 
-  <!-- AI Recommendations -->
-  <section class="features">
-    {% if recommendations %}
-      {% for rec in recommendations %}
-        <div class="feature-card">
-          <h3>{{ rec.title }}</h3>
-          <p>{{ rec.description }}</p>
+    <!-- Chat Box -->
+    <div id="chat-container" {% if not recommendation %}style="display:none"{% endif %}>
+        <div class="chat-box" id="chat-box">
+            {% if recommendation %}
+                <div class="message user">Details submitted.</div>
+                <div class="message ai">{{ recommendation }}</div>
+            {% else %}
+                <div class="message ai">Hello! Fill your details and I’ll provide personal recommendations.</div>
+            {% endif %}
         </div>
-      {% endfor %}
-    {% else %}
-      <p style="text-align:center; color:#333; margin-top:20px;">No recommendations available at the moment.</p>
-    {% endif %}
-  </section>
+
+        <form id="chat-form">
+            <input type="text" id="user-message" placeholder="Type your message..." required>
+            <button type="submit">Send</button>
+            <button type="button" id="update-details">Update Details</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const chatContainer = document.getElementById('chat-container');
+    const detailsFormContainer = document.getElementById('details-form-container');
+
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Details Form submission
+    document.getElementById('details-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch('/personal_ai', {
+            method: 'POST',
+            body: new FormData(this)
+        }).then(res => res.text())
+          .then(data => {
+              detailsFormContainer.style.display = 'none';
+              chatContainer.style.display = 'block';
+              chatBox.innerHTML = `<div class="message user">Details submitted.</div>
+                                   <div class="message ai">${data}</div>`;
+              scrollToBottom();
+          });
+    });
+
+    // Chat Form submission
+    document.getElementById('chat-form').addEventListener('submit', function(e){
+        e.preventDefault();
+        const msgInput = document.getElementById('user-message');
+        const userMsg = msgInput.value;
+        if(userMsg.trim() === '') return;
+        chatBox.innerHTML += `<div class="message user">${userMsg}</div>`;
+        scrollToBottom();
+        msgInput.value = '';
+
+        fetch('/personal_ai_chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: userMsg})
+        }).then(res => res.json())
+          .then(data => {
+              chatBox.innerHTML += `<div class="message ai">${data.reply}</div>`;
+              scrollToBottom();
+          });
+    });
+
+    // Update Details button
+    document.getElementById('update-details').addEventListener('click', function(){
+        chatContainer.style.display = 'none';
+        detailsFormContainer.style.display = 'block';
+    });
+</script>
 </body>
 </html>

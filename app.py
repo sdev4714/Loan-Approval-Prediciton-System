@@ -1,12 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 import joblib
+import openai
+from dotenv import load_dotenv
 import os
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "your_secret_key")
 
 # -------------------- MySQL Connection --------------------
 conn = mysql.connector.connect(
@@ -17,9 +22,10 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor(dictionary=True)
 
+# -------------------- OPENAI CONFIG --------------------
+openai.api_key = os.getenv("AIzaSyDyQNxedi1JpPkRyC85-zwxd4mJqTWvZh0")
 # -------------------- MODEL PATHS --------------------
-MODEL_PATH = 'models/loan_model.pkl'
-ENCODER_PATH = 'models/label_encoders.pkl'
+MODEL_PATH = 'models/loan_pipeline.pkl'
 
 # -------------------- ROUTES --------------------
 
@@ -52,7 +58,6 @@ def signup():
             conn.commit()
             flash("Signup successful! Please login.", "success")
             return redirect(url_for('login'))
-
     return render_template('signup.html')
 
 # Login
@@ -73,7 +78,6 @@ def login():
         else:
             flash("Invalid email or password!", "danger")
             return redirect(url_for('login'))
-
     return render_template('login.html')
 
 # Logout
@@ -104,16 +108,6 @@ def home():
         return render_template('home.html', name=session['name'], role=session['role'], stats=stats)
     return redirect(url_for('login'))
 
-# About page
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-# Contact page
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
 # Profile page
 @app.route('/profile')
 def profile():
@@ -128,7 +122,6 @@ def loan_history():
         cursor.execute("SELECT * FROM loans WHERE user_id=%s", (session['user_id'],))
         loans = cursor.fetchall()
 
-        # Pass stats too
         cursor.execute("""
             SELECT COUNT(*) AS total, SUM(loan_status) AS approved
             FROM loans WHERE user_id=%s
@@ -153,14 +146,13 @@ def apply_loan():
         return redirect(url_for('login'))
 
     # Load trained pipeline
-    pipeline = joblib.load('models/loan_pipeline.pkl')
+    pipeline = joblib.load(MODEL_PATH)
     prediction_result = None
 
     if request.method == 'POST':
         user_data = request.form.to_dict()
         df = pd.DataFrame([user_data])
 
-        # Convert numeric fields safely
         numeric_cols = ['person_age','person_income','person_emp_exp','loan_amnt',
                         'loan_int_rate','loan_percent_income','cb_person_cred_hist_length','credit_score']
         for col in numeric_cols:
@@ -168,11 +160,10 @@ def apply_loan():
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         df[numeric_cols] = df[numeric_cols].fillna(0)
 
-        # Predict using the pipeline
         prediction = pipeline.predict(df)[0]
         prediction_result = "✅ Approved" if prediction == 1 else "❌ Rejected"
 
-        # Convert numpy types to native Python types for MySQL
+        # Convert numpy types to Python types
         import numpy as np
         row_values = tuple(
             int(x) if isinstance(x, (np.integer, np.int64)) else
@@ -180,10 +171,8 @@ def apply_loan():
             x
             for x in df.iloc[0]
         )
-        # Add prediction and user_id
         row_values += (int(prediction), session['user_id'])
 
-        # Insert into MySQL
         cols = ', '.join(df.columns) + ', loan_status, user_id'
         placeholders = ', '.join(['%s'] * (len(df.columns)+2))
         sql = f"INSERT INTO loans ({cols}) VALUES ({placeholders})"
@@ -192,13 +181,38 @@ def apply_loan():
 
     return render_template('apply_loan.html', prediction=prediction_result)
 
-
-@app.route('/personal_ai')
+# -------------------- Personal AI Recommendation / Chatbot --------------------
+@app.route('/personal_ai', methods=['GET', 'POST'])
 def personal_ai():
-    if 'user_id' in session:
-        return render_template('personal_ai.html')
-    return redirect(url_for('login'))
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
 
+    recommendation = None
+    chat_history = []
+
+    if request.method == 'POST':
+        user_data = request.form.to_dict()
+        prompt_intro = f"User details: {user_data}\nProvide personalized actionable recommendations for improvement."
+
+        # Store user's question if any
+        user_question = user_data.get("question")
+        if user_question:
+            chat_history.append({"role": "user", "content": user_question})
+
+        try:
+            # Send request to OpenAI ChatCompletion
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful personal AI assistant."},
+                    {"role": "user", "content": prompt_intro}
+                ]
+            )
+            recommendation = response.choices[0].message.content.strip()
+        except Exception as e:
+            recommendation = f"Error fetching AI recommendation: {str(e)}"
+
+    return render_template('personal_ai.html', recommendation=recommendation, chat_history=chat_history)
 
 # -------------------- MAIN --------------------
 if __name__ == '__main__':
