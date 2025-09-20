@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan History | LoanPredict</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">LoanPredict</div>
+    <ul class="nav-links">
+      <li><span class="welcome">Hi, {{ name }}!</span></li>
+      <li><a href="{{ url_for('home') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" style="padding:60px 20px; text-align:center;">
+    <h1>📊 Loan History</h1>
+    <p>View all your past loan applications and their status.</p>
+  </section>
+
+  <!-- Loans Table -->
+  <section class="page-container">
+    {% if loans %}
+      <table class="loan-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Amount</th>
+            <th>Purpose</th>
+            <th>Income</th>
+            <th>Tenure (months)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in loans %}
+          <tr>
+            <td>{{ loan.id }}</td>
+            <td>{{ loan.amount }}</td>
+            <td>{{ loan.purpose }}</td>
+            <td>{{ loan.income }}</td>
+            <td>{{ loan.tenure }}</td>
+            <td>{{ loan.status }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p style="text-align:center; margin-top:20px;">No loans found.</p>
+    {% endif %}
+  </section>
+</body>
+</html>

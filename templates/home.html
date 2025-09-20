@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | LoanPredict</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">LoanPredict</div>
+    <ul class="nav-links">
+      <li><span class="welcome">Hi, {{ name }}!</span></li>
+      <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Welcome Banner -->
+  <section class="hero" style="padding: 60px 20px; text-align:center;">
+    <div class="hero-content">
+      <h1>Welcome Back, {{ name }}!</h1>
+      <p>Check your loan status, get recommendations, and apply for new loans easily.</p>
+    </div>
+  </section>
+
+  <!-- Quick Stats -->
+  <section class="features">
+    <div class="feature-card">
+      <h3>📝 Applied Loans</h3>
+      <p>{{ stats.applied_loans or 0 }}</p>
+    </div>
+    <div class="feature-card">
+      <h3>✅ Approved Loans</h3>
+      <p>{{ stats.approved_loans or 0 }}</p>
+    </div>
+    <div class="feature-card">
+      <h3>⏳ Pending Loans</h3>
+      <p>{{ stats.pending_loans or 0 }}</p>
+    </div>
+  </section>
+
+  <!-- Main Options -->
+  <section class="cards">
+    <div class="card">
+      <h3>🤖 Personal AI</h3>
+      <p>Get personalized loan recommendations and tips based on your profile.</p>
+      <a href="{{ url_for('personal_ai') }}" class="btn">Go</a>
+    </div>
+    <div class="card">
+      <h3>💰 Apply for Loan</h3>
+      <p>Submit your loan applications quickly and track the status.</p>
+      <a href="{{ url_for('apply_loan') }}" class="btn">Apply</a>
+    </div>
+    <div class="card">
+      <h3>📊 Loan History</h3>
+      <p>View your past loans, approvals, and repayments.</p>
+      <a href="{{ url_for('loan_history') }}" class="btn">View</a>
+    </div>
+    <div class="card">
+      <h3>💡 Tips & Recommendations</h3>
+      <p>See personalized tips to improve your loan approval chances.</p>
+      <a href="{{ url_for('personal_ai') }}" class="btn">Check</a>
+    </div>
+  </section>
+
+  <!-- Recent Activity -->
+  <section class="page-container" style="margin-top:50px;">
+    <h2>Recent Activity</h2>
+    {% if recent_activity %}
+      <ul style="list-style:none; padding:0;">
+        {% for activity in recent_activity %}
+          <li style="background:#1b1f3b; color:#f5f5f7; padding:10px 15px; margin-bottom:10px; border-radius:8px;">
+            {{ activity }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No recent activity.</p>
+    {% endif %}
+  </section>
+
+</body>
+</html>

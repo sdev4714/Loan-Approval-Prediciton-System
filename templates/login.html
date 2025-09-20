@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | LoanPredict</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">LoanPredict</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About Us</a></li>
+      <li><a href="{{ url_for('contact') }}">Contact</a></li>
+
+      {% if logged_in %}
+        <li><a href="{{ url_for('home') }}">Dashboard</a></li>
+        <li><span class="welcome">Hi, {{ name }}!</span></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}" class="active">Login</a></li>
+        <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2>Login</h2>
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <p class="switch">Don’t have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+    </div>
+  </div>
+</body>
+</html>

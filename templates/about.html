@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | LoanPredict</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">LoanPredict</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
+      <li><a href="{{ url_for('contact') }}">Contact</a></li>
+
+      {% if logged_in %}
+        <li><a href="{{ url_for('home') }}">Dashboard</a></li>
+        <li><span class="welcome">Hi, {{ name }}!</span></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <!-- About Content -->
+  <section class="page-container">
+    <h1>About LoanPredict</h1>
+    <p>
+      LoanPredict is a cutting-edge loan approval prediction system powered by AI and Machine Learning. 
+      It not only predicts loan approvals but also provides personalized financial recommendations.
+    </p>
+
+    <div class="features">
+      <div class="feature-card">
+        <h3>🔍 Accurate Predictions</h3>
+        <p>Advanced ML algorithms ensure high-accuracy loan eligibility predictions.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🤖 Personal AI Guide</h3>
+        <p>Receive recommendations tailored to your financial profile.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🔒 Secure & Reliable</h3>
+        <p>Top-notch data security and privacy maintained at every step.</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoanPredict | Premium</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">LoanPredict</div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}" class="active">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About Us</a></li>
+      <li><a href="{{ url_for('contact') }}">Contact</a></li>
+      {% if logged_in %}
+        <li><a href="{{ url_for('home') }}">Dashboard</a></li>
+        <li><span class="welcome">Hi, {{ name }}!</span></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Predict Your Loan Approvals Instantly</h1>
+      <p>LoanPredict combines AI-powered predictions and personal recommendations to help you get your loans smarter and faster.</p>
+      {% if not logged_in %}
+        <a href="{{ url_for('signup') }}" class="btn-primary">Get Started</a>
+      {% endif %}
+    </div>
+    <div class="hero-image">
+      <img src="{{ url_for('static', filename='loan_illustration.png') }}" alt="Loan Illustration">
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="feature-card">
+      <h3>⚡ Fast Predictions</h3>
+      <p>Get instant loan approval predictions with high accuracy.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🤖 Personal AI Guide</h3>
+      <p>Receive tailored recommendations based on your profile.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🔒 Secure & Reliable</h3>
+      <p>We prioritize your data privacy and security at every step.</p>
+    </div>
+  </section>
+</body>
+</html>

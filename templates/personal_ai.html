@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal AI | LoanPredict</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">LoanPredict</div>
+    <ul class="nav-links">
+      <li><span class="welcome">Hi, {{ name }}!</span></li>
+      <li><a href="{{ url_for('home') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" style="padding:60px 20px; text-align:center;">
+    <div class="hero-content">
+      <h1>🤖 Personal AI Recommendations</h1>
+      <p>Get personalized loan recommendations based on your profile and previous activity.</p>
+    </div>
+  </section>
+
+  <!-- AI Recommendations -->
+  <section class="features">
+    {% if recommendations %}
+      {% for rec in recommendations %}
+        <div class="feature-card">
+          <h3>{{ rec.title }}</h3>
+          <p>{{ rec.description }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p style="text-align:center; color:#333; margin-top:20px;">No recommendations available at the moment.</p>
+    {% endif %}
+  </section>
+</body>
+</html>
